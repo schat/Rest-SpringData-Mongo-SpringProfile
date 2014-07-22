@@ -1,0 +1,47 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<beans xmlns="http://www.springframework.org/schema/beans"
+	xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
+	xmlns:mongo="http://www.springframework.org/schema/data/mongo"
+	xmlns:context="http://www.springframework.org/schema/context"	
+	xmlns:util="http://www.springframework.org/schema/util"
+	xsi:schemaLocation="http://www.springframework.org/schema/beans http://www.springframework.org/schema/beans/spring-beans-3.1.xsd
+	http://www.springframework.org/schema/context http://www.springframework.org/schema/context/spring-context-3.1.xsd
+	http://www.springframework.org/schema/util http://www.springframework.org/schema/util/spring-util-3.1.xsd
+	http://www.springframework.org/schema/data/mongo
+    http://www.springframework.org/schema/data/mongo/spring-mongo-1.0.xsd">
+
+ <!--  <context:component-scan base-package="com.riskcare.bigdata.rest.controller" />   -->
+ 	<context:component-scan base-package="com.riskcare.bigdata" /> 
+
+ 	<bean id="riskRestController" class="com.riskcare.bigdata.rest.controller.RiskRestController">
+	 		<property name="riskService" ref="riskService"/>
+	</bean>	 
+
+	<bean id="riskService" class="com.riskcare.bigdata.rest.services.MongoRiskService">
+		<property name="riskBookMongoRepository" ref="riskBookMongoRepository" />  
+  	</bean>  
+  
+  	<bean id="mongoTemplate" class="org.springframework.data.mongodb.core.MongoTemplate">
+    	<constructor-arg name="mongo" ref="mongo"/>
+    	<constructor-arg name="databaseName" value="itest"/>
+  	</bean>  
+  	
+  	 
+  
+  	<!-- Use this post processor to translate any MongoExceptions thrown in @Repository annotated classes -->
+    <bean class="org.springframework.dao.annotation.PersistenceExceptionTranslationPostProcessor" />
+    
+    
+	
+	<beans profile="mongodb">
+  		<bean id="mongo" class="org.springframework.data.mongodb.core.MongoFactoryBean">
+    		<property name="host" value="localhost"/>
+    		<property name="port" value="27029"/>
+  		</bean>
+  		
+  		<mongo:repositories base-package="com.riskcare.bigdata.repos.mongo" />
+  	</beans> 
+	
+	
+ 	
+</beans>
