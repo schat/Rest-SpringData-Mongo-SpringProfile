@@ -1,6 +1,5 @@
 package com.riskcare.bigdata.repos.mongo;
 
-import java.util.Date;
 import java.util.List;
 
 import org.springframework.data.mongodb.repository.MongoRepository;
@@ -10,7 +9,13 @@ import com.riskcare.bigdata.mongo.domain.BookRisk;
 
 public interface RiskBookMongoRepository extends MongoRepository<BookRisk, String>{
 	
-	@Query("{'date':?0,'book_id':?1}")
-	public List<BookRisk> findByDateAndBookId(Date date,String bookId);
+	@Query("{'rplBook':?0,'country':?1}")
+	public List<BookRisk> findByBookIdAndCountry(String bookId,String country);
+	
+	@Query("{'rplBook':?0}")
+	public List<BookRisk> findByBookId(String bookId);
+	
+	@Query("{'country':?0}")
+	public List<BookRisk> findByCountry(String country);
 
 }

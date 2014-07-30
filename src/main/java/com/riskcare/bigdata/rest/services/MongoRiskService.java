@@ -1,7 +1,6 @@
 package com.riskcare.bigdata.rest.services;
 
-import java.text.SimpleDateFormat;
-import java.util.Date;
+import java.util.ArrayList;
 import java.util.List;
 
 import org.slf4j.Logger;
@@ -9,6 +8,8 @@ import org.slf4j.LoggerFactory;
 
 import com.riskcare.bigdata.mongo.domain.BookRisk;
 import com.riskcare.bigdata.repos.mongo.RiskBookMongoRepository;
+import com.riskcare.bigdata.util.ListDTO;
+import com.riskcare.bigdata.util.RiskBookWrapper;
 
 
 public class MongoRiskService implements IRiskService{
@@ -21,27 +22,74 @@ public class MongoRiskService implements IRiskService{
 		this.riskBookMongoRepository = riskBookRepository;
 	}	
   
-	public Double getRiskAmtByBookAndDate(String bookId, String dateStr) throws Exception {
+	private List<BookRisk> getRiskAmtByBookAndCountry(String bookId, String country) throws Exception {
 		
-		//Validation : if date is not in correct format say 123
-		logger.info("inside MongoRiskService");	
+		logger.info("inside getRiskAmtByBookAndCountry");	
+			
+		return riskBookMongoRepository.findByBookIdAndCountry(bookId,country);	
 		
-		SimpleDateFormat sdf = new SimpleDateFormat("ddMMyyyy");
-				
-		Date date = sdf.parse(dateStr);	
+	}
+	
+	private List<BookRisk> getRiskAmt() throws Exception {
 		
-		logger.info("date : " + date);	
+		logger.info("inside getRiskAmt");	
+			
+		return riskBookMongoRepository.findAll();	
 		
-		List<BookRisk> bookRiskList = riskBookMongoRepository.findByDateAndBookId(date, bookId);
-		
-		if(bookRiskList.size() == 0)
-			throw new Exception("No record for the bookid and date passed");
-		
-		if(bookRiskList.size() > 1)
-			throw new Exception("Multiple records exist for the bookid and date passed");
-		
-		return bookRiskList.get(0).getRiskAmt();
 	}
 
+	public ListDTO<RiskBookWrapper> getRiskAmt(RiskBookWrapper riskBookWrapper) {
+		
+		logger.info("inside getRiskAmt");	
+				
+//		if(riskBookWrapper.getBookId() == null && riskBookWrapper.getCountry() == null)
+//			return ListDTO.failure("Both BookId and Country can't be null");
+		
+		List<BookRisk> bookRiskList = new ArrayList<BookRisk>();
+		try{
+			if(riskBookWrapper.getBookId() == null && riskBookWrapper.getCountry() == null)
+				bookRiskList = getRiskAmt();
+			else if(riskBookWrapper.getBookId() != null && riskBookWrapper.getCountry() != null)
+				bookRiskList = getRiskAmtByBookAndCountry(riskBookWrapper.getBookId(),riskBookWrapper.getCountry());
+			else if(riskBookWrapper.getBookId() != null && riskBookWrapper.getCountry() == null)
+				bookRiskList = getRiskAmtByBook(riskBookWrapper.getBookId());
+			else
+				bookRiskList = getRiskAmtByCountry(riskBookWrapper.getCountry());	
+		}catch(Exception e){
+			return ListDTO.failure( e.getMessage());
+		}
+		
+		return convertBookRiskList(bookRiskList);
+		
+	}
+	
+	private ListDTO<RiskBookWrapper> convertBookRiskList(List<BookRisk> bookRiskList) {
+		
+		List<RiskBookWrapper> riskBookWrapperList = new ArrayList<RiskBookWrapper>();
+		
+		for(BookRisk br: bookRiskList){
+			RiskBookWrapper riskBookWrapper = new RiskBookWrapper();
+			riskBookWrapper.setBookId(br.getBookId());
+			riskBookWrapper.setCountry(br.getCountry());
+			riskBookWrapper.setRiskAmt(br.getRiskAmt());
+			riskBookWrapperList.add(riskBookWrapper);
+		}
+		
+		return new ListDTO<RiskBookWrapper>(riskBookWrapperList.size(), riskBookWrapperList);
+	}
+
+	private List<BookRisk> getRiskAmtByBook(String bookId) throws Exception {
+		
+		logger.info("inside getRiskAmtByBook");	
+			
+		return riskBookMongoRepository.findByBookId(bookId);		
+	}
+
+	private List<BookRisk> getRiskAmtByCountry(String country) throws Exception {
+		
+		logger.info("inside getRiskAmtByCountry");	
+			
+		return riskBookMongoRepository.findByCountry(country);		
+	}
 
 } 

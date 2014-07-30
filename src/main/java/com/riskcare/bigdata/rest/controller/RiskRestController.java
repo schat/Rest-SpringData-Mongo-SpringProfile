@@ -1,14 +1,19 @@
 package com.riskcare.bigdata.rest.controller;
 
+
+import javax.servlet.http.HttpServletRequest;
+
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.stereotype.Controller;
-import org.springframework.web.bind.annotation.PathVariable;
+import org.springframework.web.bind.annotation.RequestBody;
 import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RequestMethod;
 import org.springframework.web.bind.annotation.ResponseBody;
 
 import com.riskcare.bigdata.rest.services.IRiskService;
+import com.riskcare.bigdata.util.ListDTO;
+import com.riskcare.bigdata.util.RiskBookWrapper;
 
 
 
@@ -20,19 +25,15 @@ public class RiskRestController {
 	private IRiskService riskService;
 	
 	public void setRiskService (IRiskService riskService){
-		this.riskService = riskService; 
-		// TODO : this will be mongodb based service , 
+		this.riskService = riskService;		
 	}
 	
-    @RequestMapping(method = RequestMethod.GET, value = "/bigdata/getRiskAmtByBookAndDate/{bookId}/{date}")
-    public @ResponseBody Double getRiskAmtByBookAndDate(
-    		@PathVariable("bookId") String bookId,
-    		@PathVariable("date") String date) throws Exception{
-         
-    	logger.info("inside getRiskAmtByBookAndDate , bookId : " + bookId + " , date : " + date);
-    	
-    	return (riskService.getRiskAmtByBookAndDate(bookId, date));
-    
-    }
-
+	@RequestMapping(method = RequestMethod.POST, value = "/bigdata/getRiskAmt", produces = "application/json")
+    @ResponseBody
+    public ListDTO<RiskBookWrapper> getRiskAmt(HttpServletRequest request, @RequestBody RiskBookWrapper riskBookWrapper) throws Exception {
+			
+		logger.info("inside getRiskAmt");
+		
+		return riskService.getRiskAmt(riskBookWrapper);		
+	}	
 }

@@ -2,13 +2,10 @@ package com.riskcare.bigdata.rest.controller;
 
 import java.io.IOException;
 import java.text.ParseException;
-import java.text.SimpleDateFormat;
-import java.util.Date;
-
-import junit.framework.Assert;
 
 import org.junit.After;
 import org.junit.AfterClass;
+import org.junit.Assert;
 import org.junit.Before;
 import org.junit.BeforeClass;
 import org.junit.Test;
@@ -22,6 +19,8 @@ import com.mongodb.Mongo;
 import com.riskcare.bigdata.mongo.domain.BookRisk;
 import com.riskcare.bigdata.repos.mongo.RiskBookMongoRepository;
 import com.riskcare.bigdata.rest.services.MongoRiskService;
+import com.riskcare.bigdata.util.ListDTO;
+import com.riskcare.bigdata.util.RiskBookWrapper;
 
 import de.flapdoodle.embed.mongo.Command;
 import de.flapdoodle.embed.mongo.MongodExecutable;
@@ -100,13 +99,13 @@ public class MongoRepositoryTest {
     	mongoRiskService = new MongoRiskService();
     	mongoRiskService.setRiskBookMongoRepository(riskBookMongoRepository);
     	
-    	riskBookMongoRepository.save(createBook("BOOK_01","10032010",21000.00));
+    	riskBookMongoRepository.save(createBook("BOOK_01","UK",21000.00));
 		
-    	riskBookMongoRepository.save(createBook("BOOK_01","10042010",22000.00));
+    	riskBookMongoRepository.save(createBook("BOOK_01","USA",22000.00));
 		
-    	riskBookMongoRepository.save(createBook("BOOK_02","10032010",23000.00));
+    	riskBookMongoRepository.save(createBook("BOOK_02","UK",23000.00));
 
-    	riskBookMongoRepository.save(createBook("BOOK_02","10042010",24000.00));
+    	riskBookMongoRepository.save(createBook("BOOK_02","USA",24000.00));
     }
 
     @After
@@ -116,50 +115,53 @@ public class MongoRepositoryTest {
    
 
     @Test
-    public void testFindByDateAndBookId() throws Exception {   	
+    public void testGetRiskAmt() throws Exception {   	
+    	
+    	RiskBookWrapper riskBookWrapper = new RiskBookWrapper();
+    	riskBookWrapper.setBookId("BOOK_01");
+    	riskBookWrapper.setCountry("UK");
+    	
+		ListDTO<RiskBookWrapper> listDto = mongoRiskService.getRiskAmt(riskBookWrapper);
 		
-		Double riskAmt = mongoRiskService.getRiskAmtByBookAndDate("BOOK_01", "10042010");
 		
-		Assert.assertEquals(riskAmt,22000.0);
+		Assert.assertEquals(listDto.getRecords().get(0).getRiskAmt(),new Double(21000.0));
     }
     
     @Test
     public void testNoRecFoundException() {   	
     	
-    	try{
-		
-    		mongoRiskService.getRiskAmtByBookAndDate("BOOK_001", "10042010");
-    		Assert.fail("Test should throw exception");
-    	}catch(Exception e){
-    		
-    	}
+//    	try{
+//		
+//    		mongoRiskService.getRiskAmtByBookAndCountry("BOOK_001", "UK");
+//    		Assert.fail("Test should throw exception");
+//    	}catch(Exception e){
+//    		
+//    	}
 		
     }
     
     @Test
     public void testMultipleRecFoundException() {   	
     	
-    	try{
-		
-    		riskBookMongoRepository.save(createBook("BOOK_01","10032010",21000.00));
-    		
-    		mongoRiskService.getRiskAmtByBookAndDate("BOOK_01", "10032010");
-    		Assert.fail("Test should throw exception");
-    	}catch(Exception e){
-    		
-    	}
+//    	try{
+//		
+//    		riskBookMongoRepository.save(createBook("BOOK_01","UK",23000.00));
+//    		
+//    		mongoRiskService.getRiskAmtByBookAndCountry("BOOK_01", "UK");
+//    		Assert.fail("Test should throw exception");
+//    	}catch(Exception e){
+//    		
+//    	}
 		
     }
 
-	private BookRisk createBook(String bookId, String dateStr, double riskAmt) throws ParseException {
+	private BookRisk createBook(String bookId, String country, double riskAmt) throws ParseException {
 		
-		SimpleDateFormat sdf = new SimpleDateFormat("ddMMyyyy");
-		
+			
 		final BookRisk bookRisk = new BookRisk();
 		bookRisk.setBookId(bookId);
-		    	    	
-		Date date = sdf.parse(dateStr);		
-		bookRisk.setDate( date);
+		bookRisk.setCountry(country);
+		
 		bookRisk.setRiskAmt(riskAmt);
 		
 		return bookRisk;

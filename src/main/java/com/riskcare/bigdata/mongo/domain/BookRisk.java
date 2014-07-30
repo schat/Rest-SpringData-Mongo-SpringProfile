@@ -1,31 +1,29 @@
 package com.riskcare.bigdata.mongo.domain;
 
-import java.util.Date;
-
 import org.springframework.data.annotation.Id;
 import org.springframework.data.mongodb.core.mapping.Document;
 import org.springframework.data.mongodb.core.mapping.Field;
 
-@Document(collection = "total_sensitivity")
+@Document(collection = "map_reduced_risk")
 public class BookRisk {
 		
 	@Id
     private String id;
 
-	@Field("book_id")
+	@Field("rplBook")
 	private String bookId;
 	
-	@Field("date")
-	private Date date;
+	@Field("country")
+	private String country;
 	
 	@Field("risk_amt")
 	private Double riskAmt;
    
     public BookRisk() {}
 
-    public BookRisk(String bookId,Date date, Double riskAmt) {
+    public BookRisk(String bookId,String country, Double riskAmt) {
         this.bookId = bookId;
-        this.date=date;
+        this.country=country;
         this.riskAmt = riskAmt;
     }
 
@@ -37,12 +35,12 @@ public class BookRisk {
 		this.bookId = bookId;
 	}
 
-	public Date getDate() {
-		return date;
+	public String getCountry() {
+		return country;
 	}
 
-	public void setDate(Date date) {
-		this.date = date;
+	public void setCountry(String country) {
+		this.country = country;
 	}
 
 	public Double getRiskAmt() {
@@ -55,7 +53,7 @@ public class BookRisk {
 
     @Override
     public String toString() {
-        return String.format("Risk[id=%s, book_id='%s' , date ='%s']",id, bookId,date);
+        return String.format("Risk[id=%s, book_id='%s' , country ='%s']",id, bookId,country);
     }
 
     

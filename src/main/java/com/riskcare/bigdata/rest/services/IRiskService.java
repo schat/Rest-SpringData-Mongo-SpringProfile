@@ -1,7 +1,10 @@
 package com.riskcare.bigdata.rest.services;
 
+import com.riskcare.bigdata.util.ListDTO;
+import com.riskcare.bigdata.util.RiskBookWrapper;
+
 
 public interface IRiskService {
-
-	public Double getRiskAmtByBookAndDate(String bookId, String date) throws Exception;
+	
+	public ListDTO<RiskBookWrapper> getRiskAmt(RiskBookWrapper riskBookWrapper) throws Exception;
 }
